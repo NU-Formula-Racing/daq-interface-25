@@ -12,3 +12,8 @@ pyvenv.cfg
 dist/
 pip-selfcheck.json
 __pycache__/
+/venve
+/try
+/daq-interface-env/
+/daq
+/__pycache__
