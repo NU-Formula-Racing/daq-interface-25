@@ -42,6 +42,7 @@ class MultiFrameApp(ctk.CTk):
 
         #our data
         self.df = dataframe
+        self.Npoints = len(dataframe)
 
 
         self.create_layout()
@@ -166,7 +167,7 @@ class MultiFrameApp(ctk.CTk):
         #     self.data_dict[label] = btn#save it in a dictionary
 
         columns = self.df.columns
-        for label in columns[1::]:
+        for label in columns:
             btn = ctk.CTkButton(self.data_frame, text=label, fg_color="white", bg_color= NU_SILVER_HEX, hover_color=NU_SILVER_HEX, text_color='black', command=lambda lbl=label: self.data_choice(lbl))
             btn.pack(pady=10, padx=10, fill="x")#display buttons for all columns
             self.data_dict[label] = btn#save it in a dictionary
@@ -316,19 +317,50 @@ class MultiFrameApp(ctk.CTk):
         for widget in frame.winfo_children():
             widget.destroy()
 
+        #t check if time is inthe list of cols
+        timestamp_col = self.df.columns[0]
+        plot_against_time = timestamp_col in data_choice
+
         # #data points
+        # if len(data_choice) <= 1:
+        #     x = range(self.Npoints)#for the timestamps
+        #     y = self.df[data_choice[0]]
+        # elif len(data_choice) >= 2:
+        #     if data_choice[0] == self.df.columns[0]:#plotting against time
+        #         x = range(self.Npoints)#for the timestamps
+        #         y_cols = data_choice[1:]
+        #         data_choice = data_choice[1:]
+        #         y = self.df[y_cols]
+        #     else:#not against time
+        #         x = self.df[data_choice[0]]#else its the first selection
+        #         y_cols = data_choice[1:]
+        #         data_choice = data_choice[1:]
+        #         y = self.df[y_cols]
+            # times = self.df.columns[0]
+            # x = self.df[times]
+# ###################################################
+
         if len(data_choice) <= 1:
+            x = range(self.Npoints)#for the timestamps
             y = self.df[data_choice[0]]
         else:
-            y = self.df[data_choice]
-        times = self.df.columns[0]
-        x = self.df[times]
+            if plot_against_time:#if time is one of the cols
+                x = range(self.Npoints)#for the timestamps
+                y_cols = [col for col in data_choice if col != timestamp_col]
+                data_choice = [data for data in data_choice if data != timestamp_col]
+                y = self.df[y_cols]
+            else:#not against time
+                x = self.df[data_choice[0]]#else its the first selection
+                y_cols = data_choice[1:]
+                data_choice = data_choice[1:]
+                y = self.df[y_cols]
 
         fig, ax = plt.subplots(figsize=(5,4))
         # Example: choose a plot type based on graph_choice
         if graph_choice == "Line":
             # For example, a simple line plot (replace with your data_choice logic)
             ax.plot(x,y, label=data_choice)
+            ax.legend(loc='upper right')
         elif graph_choice == "Scatterplot":
             ax.scatter(x,y, label=data_choice)
         elif graph_choice == "Bar":
@@ -336,10 +368,11 @@ class MultiFrameApp(ctk.CTk):
         else:
             ax.text(0.5, 0.5, "No valid graph type", ha="center")
         concat_title = ""
-        for dc in data_choice:
-            concat_title += f"{dc}, "
+        for dc in data_choice[:-1]:
+            concat_title += f"{dc} v "
+        concat_title += str(data_choice[len(data_choice)-1])
         concat_title = concat_title.strip()
-        ax.set_title(f"{concat_title} v Time")
+        ax.set_title(f"{concat_title}")
         #canvas to draw figure
         
         canvas = FigureCanvasTkAgg(fig, master=frame)

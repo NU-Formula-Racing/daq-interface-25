@@ -4,6 +4,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from test import MultiFrameApp
 import time
 import pandas as pd
+from PIL import Image
 
 # Constants
 NU_PURPLE_HEX = "#4E2A84"
@@ -39,6 +40,15 @@ class DAQInterface(ctk.CTk):
                                      height=40,
                                      command=self.configuration)
         start_button.pack(padx = 25, pady = 25)
+
+        try:
+            car_gif = Image.open("nfrimage.jpg")
+            self.car_animation = ctk.CTkImage(car_gif, size=(150, 75))
+            animation_label = ctk.CTkLabel(self.title_screen, image=self.car_animation, text="")
+            animation_label.pack(pady=20)
+
+        except FileNotFoundError:
+            print("Warning: car_driving.gif not found. Skipping animation.")
 
     def configuration(self):
         time.sleep(0.4)
